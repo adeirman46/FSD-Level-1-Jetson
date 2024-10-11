@@ -7,7 +7,7 @@ import sys
 import torch
 from collections import deque
 import time
-from sort import Sort
+from all_files.sort import Sort
 from filterpy.kalman import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
 import threading
