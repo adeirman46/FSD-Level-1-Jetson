@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy
-from PyQt6.QtGui import QImage, QPixmap, QFont
-from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QFrame
+from PyQt6.QtGui import QImage, QPixmap, QFont, QColor
+from PyQt6.QtCore import Qt, QUrl, QTimer
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from plane_visualization import PlaneVisualizationWidget
 
@@ -8,6 +8,9 @@ class VideoStreamGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.warning_visible = False
+        self.blink_timer = QTimer(self)
+        self.blink_timer.timeout.connect(self.toggle_warning)
 
     def initUI(self):
         self.setWindowTitle("Advanced Driver Assistance System")
@@ -24,11 +27,23 @@ class VideoStreamGUI(QMainWindow):
         main_layout.addWidget(left_widget, 7)  # Allocate 70% of the width
 
         # Video display
-        self.video_label = QLabel()
+        self.video_container = QFrame()
+        # self.video_container.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
+        self.video_container.setLineWidth(2)
+        self.video_container.setMidLineWidth(1)
+        self.video_container.setStyleSheet("background-color: #e6e9ed;")
+        self.video_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        left_layout.addWidget(self.video_container, 9)  # Allocate 90% of the height
+
+        self.video_label = QLabel(self.video_container)
         self.video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.video_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.video_label.setStyleSheet("background-color: #e6e9ed;")
-        left_layout.addWidget(self.video_label, 9)  # Allocate 90% of the height
+        self.video_label.setStyleSheet("background-color: transparent;")
+
+        # Warning label (overlay on video)
+        self.warning_label = QLabel("WARNING", self.video_container)
+        self.warning_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.warning_label.setStyleSheet("background-color: yellow; color: black; font-size: 24px; font-weight: bold; padding: 10px; border: 2px solid black;")
+        self.warning_label.hide()
 
         # Info panel
         info_panel = QWidget()
@@ -67,6 +82,22 @@ class VideoStreamGUI(QMainWindow):
 
         self.showMaximized()  # Start in full screen mode
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.update_video_layout()
+
+    def update_video_layout(self):
+        # Update video label size
+        self.video_label.setGeometry(self.video_container.rect())
+        
+        # Update warning label size and position
+        warning_width = self.video_container.width()
+        warning_height = 50  # Fixed height
+        self.warning_label.setFixedSize(warning_width, warning_height)
+        warning_x = 0  # Align to the left edge of the video container
+        warning_y = 10  # 20 pixels from the top
+        self.warning_label.move(warning_x, warning_y)
+
     def on_map_loaded(self):
         self.map_loading_label.hide()
         self.map_view.show()
@@ -78,15 +109,25 @@ class VideoStreamGUI(QMainWindow):
             bytes_per_line = ch * w
             qt_image = QImage(frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
             pixmap = QPixmap.fromImage(qt_image)
-            self.video_label.setPixmap(pixmap.scaled(self.video_label.size(), Qt.AspectRatioMode.KeepAspectRatio))
+            self.video_label.setPixmap(pixmap.scaled(self.video_container.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
         # Update info panel
         if distance is not None:
             self.distance_label.setText(f"Distance: {distance:.2f}m")
+            if distance < 2:
+                if not self.blink_timer.isActive():
+                    self.blink_timer.start(200)  # Blink every 200ms
+            else:
+                self.blink_timer.stop()
+                self.warning_label.hide()
         if velocity is not None:
             self.speed_label.setText(f"Speed: {velocity:.2f} km/h")
         if brake_status is not None:
             self.brake_label.setText(f"Brake: {brake_status}")
+
+    def toggle_warning(self):
+        self.warning_visible = not self.warning_visible
+        self.warning_label.setVisible(self.warning_visible)
 
     def update_plane(self, tracked_objects, depth_map):
         self.plane_widget.update_data(tracked_objects, depth_map)
@@ -98,6 +139,7 @@ class VideoStreamGUI(QMainWindow):
 
     def closeEvent(self, event):
         # Implement any cleanup if necessary
+        self.blink_timer.stop()
         event.accept()
 
 if __name__ == "__main__":
