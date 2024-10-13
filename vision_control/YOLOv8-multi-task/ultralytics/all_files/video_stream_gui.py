@@ -27,7 +27,7 @@ class VideoStreamGUI(QMainWindow):
         self.video_label = QLabel()
         self.video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.video_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.video_label.setStyleSheet("background-color: #000000;")
+        self.video_label.setStyleSheet("background-color: #e6e9ed;")
         left_layout.addWidget(self.video_label, 9)  # Allocate 90% of the height
 
         # Info panel
