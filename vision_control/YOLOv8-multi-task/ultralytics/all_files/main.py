@@ -4,7 +4,6 @@ import numpy as np
 from collections import deque
 import time
 import torch
-from sort import Sort
 import signal
 import sys
 import os
@@ -15,6 +14,7 @@ from visualizer import Visualizer
 from serial_handler import SerialHandler
 from logging_handler import LoggingHandler
 from video_stream_gui import VideoStreamGUI, QApplication
+from sort import Sort
 
 class MainApplication:
     def __init__(self, args):
@@ -94,7 +94,6 @@ class MainApplication:
             self.cleanup()
 
     def cleanup(self):
-        """Clean up resources and stop threads."""
         print("Cleaning up resources...")
         self.camera.close()
         if self.serial_handler:
@@ -205,17 +204,10 @@ class MainApplication:
         Visualizer.draw_distance_and_velocity(combined_img, effective_distance, desired_velocity, 
                                               actual_velocity, actual_brake, desired_brake, brake_state)
         
-        try:
-            if tracked_objects.size > 0 and depth_to_process is not None:
-                plane_img = Visualizer.create_2d_plane(tracked_objects, depth_to_process)
-                if plane_img is not None:
-                    display_size = (800, 800)
-                    resized_plane_img = cv2.resize(plane_img, display_size, interpolation=cv2.INTER_AREA)
-                    cv2.imshow("2D Obstacle Visualization", resized_plane_img)
-            else:
-                print("No tracked objects or depth data available for 2D plane visualization")
-        except Exception as e:
-            print(f"Error in creating 2D plane visualization: {e}")
+        # Create 2D plane visualization
+        plane_img = None
+        if tracked_objects.size > 0 and depth_to_process is not None:
+            plane_img = Visualizer.create_2d_plane(tracked_objects, depth_to_process)
         
         visualization_time = time.time() - visualization_start
 
@@ -234,11 +226,11 @@ class MainApplication:
         cv2.putText(combined_img, f'Visualization: {visualization_time*1000:.2f}ms', (10, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         cv2.putText(combined_img, f'Total: {overall_time*1000:.2f}ms', (10, 330), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-        cv2.imshow("ZED + YOLOv8 - Combined Detection and Segmentation", cv2.cvtColor(combined_img, cv2.COLOR_RGB2BGR))
-
         # Update GUI
         self.gui.update_frame(combined_img, effective_distance, actual_velocity, "Active" if brake_state == 1 else "Inactive")
-        
+        if plane_img is not None:
+            self.gui.update_plane(plane_img)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ZED YOLOv8 Object Detection")
     parser.add_argument('--model', type=str, default='/home/irman/Documents/FSD-Level-1-Jetson/vision_control/YOLOv8-multi-task/ultralytics/models/yolom4_50.pt', help='Path to the YOLOv8 model')
