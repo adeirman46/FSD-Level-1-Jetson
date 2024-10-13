@@ -204,10 +204,10 @@ class MainApplication:
         Visualizer.draw_distance_and_velocity(combined_img, effective_distance, desired_velocity, 
                                               actual_velocity, actual_brake, desired_brake, brake_state)
         
-        # Create 2D plane visualization
-        plane_img = None
-        if tracked_objects.size > 0 and depth_to_process is not None:
-            plane_img = Visualizer.create_2d_plane(tracked_objects, depth_to_process)
+        # # Create 2D plane visualization
+        # plane_img = None
+        # if tracked_objects.size > 0 and depth_to_process is not None:
+        #     plane_img = Visualizer.create_2d_plane(tracked_objects, depth_to_process)
         
         visualization_time = time.time() - visualization_start
 
@@ -228,8 +228,9 @@ class MainApplication:
 
         # Update GUI
         self.gui.update_frame(combined_img, effective_distance, actual_velocity, "Active" if brake_state == 1 else "Inactive")
-        if plane_img is not None:
-            self.gui.update_plane(plane_img)
+        # if plane_img is not None:
+        #     self.gui.update_plane(plane_img)
+        self.gui.update_plane(tracked_objects, depth_to_process)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ZED YOLOv8 Object Detection")
