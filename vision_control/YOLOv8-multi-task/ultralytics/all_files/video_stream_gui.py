@@ -53,7 +53,9 @@ class VideoStreamGUI(QMainWindow):
         self.distance_label = QLabel("Distance: N/A")
         self.speed_label = QLabel("Speed: N/A")
         self.brake_label = QLabel("Brake: N/A")
-        for label in (self.distance_label, self.speed_label, self.brake_label):
+        self.adas_label = QLabel("ADAS: Activated")
+        self.adas_label.setStyleSheet("font-size: 16px; padding: 5px; background-color: #008000; color: white; border-radius: 5px;")
+        for label in (self.distance_label, self.speed_label, self.brake_label, self.adas_label):
             label.setStyleSheet("font-size: 16px; padding: 5px; background-color: #c0cffa; border-radius: 5px;")
             info_layout.addWidget(label)
 
@@ -102,7 +104,7 @@ class VideoStreamGUI(QMainWindow):
         self.map_loading_label.hide()
         self.map_view.show()
 
-    def update_frame(self, frame, distance=None, velocity=None, brake_status=None):
+    def update_frame(self, frame, distance=None, velocity=None, brake_status=None, adas_active=True):
         # Update video frame
         if frame is not None:
             h, w, ch = frame.shape
@@ -124,6 +126,15 @@ class VideoStreamGUI(QMainWindow):
             self.speed_label.setText(f"Speed: {velocity:.2f} km/h")
         if brake_status is not None:
             self.brake_label.setText(f"Brake: {brake_status}")
+        
+        # Update ADAS status
+        if adas_active:
+            self.adas_label.setText("ADAS: Activated")
+            self.adas_label.setStyleSheet("font-size: 16px; padding: 5px; background-color: #008000; color: white; border-radius: 5px;")
+        else:
+            self.adas_label.setText("ADAS: Deactivated")
+            self.adas_label.setStyleSheet("font-size: 16px; padding: 5px; background-color: #FF0000; color: white; border-radius: 5px;")
+
 
     def toggle_warning(self):
         self.warning_visible = not self.warning_visible

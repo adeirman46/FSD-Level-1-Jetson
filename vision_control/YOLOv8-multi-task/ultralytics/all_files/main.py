@@ -45,6 +45,8 @@ class MainApplication:
 
         signal.signal(signal.SIGINT, self.signal_handler)
 
+        self.adas_active = False  # Default ADAS state is active
+        
         # Initialize GUI
         self.app = QApplication(sys.argv)
         self.gui = VideoStreamGUI()
@@ -204,11 +206,6 @@ class MainApplication:
         Visualizer.draw_distance_and_velocity(combined_img, effective_distance, desired_velocity, 
                                               actual_velocity, actual_brake, desired_brake, brake_state)
         
-        # # Create 2D plane visualization
-        # plane_img = None
-        # if tracked_objects.size > 0 and depth_to_process is not None:
-        #     plane_img = Visualizer.create_2d_plane(tracked_objects, depth_to_process)
-        
         visualization_time = time.time() - visualization_start
 
         # Calculate and display FPS
@@ -227,9 +224,10 @@ class MainApplication:
         # cv2.putText(combined_img, f'Total: {overall_time*1000:.2f}ms', (10, 330), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
         # Update GUI
-        self.gui.update_frame(combined_img, effective_distance, actual_velocity, "Active" if brake_state == 1 else "Inactive")
-        # if plane_img is not None:
-        #     self.gui.update_plane(plane_img)
+        self.gui.update_frame(combined_img, effective_distance, actual_velocity, 
+                              "Active" if brake_state == 1 else "Inactive", 
+                              self.adas_active)
+        
         self.gui.update_plane(tracked_objects, depth_to_process)
 
 if __name__ == "__main__":
