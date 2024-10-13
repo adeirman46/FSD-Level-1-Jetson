@@ -14,6 +14,7 @@ from object_detector import ObjectDetector
 from visualizer import Visualizer
 from serial_handler import SerialHandler
 from logging_handler import LoggingHandler
+from video_stream_gui import VideoStreamGUI, QApplication
 
 class MainApplication:
     def __init__(self, args):
@@ -43,6 +44,10 @@ class MainApplication:
             print("Continuing without logging.")
 
         signal.signal(signal.SIGINT, self.signal_handler)
+
+        # Initialize GUI
+        self.app = QApplication(sys.argv)
+        self.gui = VideoStreamGUI()
 
     def signal_handler(self, sig, frame):
         print("Ctrl+C detected. Cleaning up...")
@@ -79,6 +84,8 @@ class MainApplication:
                 if len(self.frame_buffer) == self.frame_buffer.maxlen:
                     self.process_frame()
 
+                self.app.processEvents()  # Allow GUI to update
+
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
         except KeyboardInterrupt:
@@ -94,6 +101,7 @@ class MainApplication:
             self.serial_handler.stop()
         if self.logging_handler:
             self.logging_handler.stop()
+        self.gui.close()
         cv2.destroyAllWindows()
         print("Cleanup completed.")
 
@@ -228,6 +236,9 @@ class MainApplication:
 
         cv2.imshow("ZED + YOLOv8 - Combined Detection and Segmentation", cv2.cvtColor(combined_img, cv2.COLOR_RGB2BGR))
 
+        # Update GUI
+        self.gui.update_frame(combined_img, effective_distance, actual_velocity, "Active" if brake_state == 1 else "Inactive")
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ZED YOLOv8 Object Detection")
     parser.add_argument('--model', type=str, default='/home/irman/Documents/FSD-Level-1-Jetson/vision_control/YOLOv8-multi-task/ultralytics/models/yolom4_50.pt', help='Path to the YOLOv8 model')
