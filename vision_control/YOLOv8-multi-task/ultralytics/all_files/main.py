@@ -215,16 +215,16 @@ class MainApplication:
         overall_end_time = time.time()
         overall_time = (overall_end_time - overall_start_time)
         fps = 1 / overall_time
-        cv2.putText(combined_img, f'FPS: {fps:.2f}', (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        cv2.putText(combined_img, f'FPS: {fps:.2f}', (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         
         # Display timing information
-        cv2.putText(combined_img, f'Frame Retrieval: {frame_retrieval_time*1000:.2f}ms', (10, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        cv2.putText(combined_img, f'Preprocessing: {preprocess_time*1000:.2f}ms', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        cv2.putText(combined_img, f'Detection: {detection_time*1000:.2f}ms', (10, 250), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        cv2.putText(combined_img, f'Post-processing: {postprocess_time*1000:.2f}ms', (10, 270), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        cv2.putText(combined_img, f'Tracking: {tracking_time*1000:.2f}ms', (10, 290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        cv2.putText(combined_img, f'Visualization: {visualization_time*1000:.2f}ms', (10, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        cv2.putText(combined_img, f'Total: {overall_time*1000:.2f}ms', (10, 330), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Frame Retrieval: {frame_retrieval_time*1000:.2f}ms', (10, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Preprocessing: {preprocess_time*1000:.2f}ms', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Detection: {detection_time*1000:.2f}ms', (10, 250), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Post-processing: {postprocess_time*1000:.2f}ms', (10, 270), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Tracking: {tracking_time*1000:.2f}ms', (10, 290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Visualization: {visualization_time*1000:.2f}ms', (10, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # cv2.putText(combined_img, f'Total: {overall_time*1000:.2f}ms', (10, 330), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
         # Update GUI
         self.gui.update_frame(combined_img, effective_distance, actual_velocity, "Active" if brake_state == 1 else "Inactive")
